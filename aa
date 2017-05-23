@@ -1,0 +1,5 @@
+# define 'logpresso' class
+class logpresso real 10.25.204.149 10.25.204.150
+# limit concurrent access of logpresso class
+limit logpresso 80 Any /etc/ftpd/msg.toomany
+allow-retrieve absolute class=logpresso /mcsapp1/mcsadm 
