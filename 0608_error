@@ -1,0 +1,7 @@
+[2017-06-08 11:00:00,337] ERROR (AbstractLogger) - araqne log api: logger [local\ts11] stopped
+java.lang.NullPointerException
+	at org.logpresso.ftp.FtpRateLimitInputStream.close(FtpRateLimitInputStream.java:63)
+	at java.io.BufferedInputStream.close(BufferedInputStream.java:483)
+	at org.logpresso.ftp.FtpRotationFileLogger.runOnce(FtpRotationFileLogger.java:229)
+	at org.araqne.log.api.AbstractLogger$DefaultLoggerTask.run(AbstractLogger.java:541)
+	at java.lang.Thread.run(Thread.java:745)
