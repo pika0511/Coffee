@@ -1,0 +1,37 @@
+안녕하세요, 비앤지시스템 최명수입니다.
+
+하기에 금일(6/12일) 진행한 FTP/SFTP 수집기별 cpu 사용량 테스트 결과 송부드리오니, 참조하시기 바랍니다.
+
+■ 테스트 결과 요약
+ → SFTP 수집기를 통한 수집이 FTP 수집기를 통한 수집보다 수집 대상 서버에 cpu 부하를 더 주는 것으로 판단되며,(SFTP 比 FTP - avg 49% : avg 33%)
+   수집재개 당일날 cpu 사용량에 대한 결과는 다른 요인이 추가적으로 작용한 것으로 판단됩니다.(주말기간 평균 cpu사용량 감소)
+
+■ 테스트 환경
+ 1. 서버 : 물류시스템그룹 테스트 서버(HP-UX)
+ 2. 로그 : 로그제네레이터로 10ea 로그파일 지속 적재(TS 로그 기준, 파일당 rate : 1000) - total 초당 10,000건으로 실제보다는(초당 3,500~4,000건) 가혹 조건
+ 3. 모니터링 툴 : glance
+ 4. avg : glance의 cpu사용량 기준 current값들에 대한 평균
+ 5. max : glance의 cpu사용량 기준 current값들에 대한 최고치
+
+■ 테스트 결과
+ 1. 로그제네레이터 On(모든 수집기 Off) 
+  - avg : 15%
+  - max : 18%
+ 
+ 2. 로그제네레이터 On + SFTP 수집기 On(10ea - total 초당 10,000건 수집) 
+  - avg : 49%
+  - max : 53%
+ 
+ 3. 로그제네레이터 On + FTP 수집기 On(10ea - total 초당 10,000건 수집) 
+  - avg : 33% 
+  - max : 53%
+
+■ 주말기간(6/10 ~ 6/12) mcsapp1(primary), mcsapp2(secondary) cpu 사용량 정보(現 FTP 수집기 사용 - 서버당 각각 35ea On)
+ 1. mcsapp1(primary)    : 약 27%
+ 2. mcsapp2(secondary)  : 약 23%
+
+■ 기존 SFTP 수집기 사용시(서버당 각각 35ea On) 안정화된 기간의 mcsapp1(primary), mcsapp2(secondary) cpu 사용량 정보
+ 1. mcsapp1(primary)    : 약 24%
+ 2. mcsapp2(secondary)  : 약 23%
+
+감사합니다. 
