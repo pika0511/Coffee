@@ -1,0 +1,8 @@
+org.osgi.framework.BundleException: 
+Unable to resolve com.logpresso.mcs [114](R 114.0): 
+
+missing requirement [com.logpresso.mcs [114](R 114.0)] osgi.wiring.package; 
+(osgi.wiring.package=org.logpresso.ssh.impl) 
+
+Unresolved requirements: [[com.logpresso.mcs [114](R 114.0)] osgi.wiring.package; 
+(osgi.wiring.package=org.logpresso.ssh.impl)]
