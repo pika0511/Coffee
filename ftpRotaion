@@ -1,0 +1,358 @@
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by Fernflower decompiler)
+//
+
+package org.logpresso.ftp;
+
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.text.SimpleDateFormat;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.regex.Pattern;
+import org.apache.commons.net.ftp.FTPClient;
+import org.apache.commons.net.ftp.FTPConnectionClosedException;
+import org.apache.commons.net.ftp.FTPFile;
+import org.araqne.log.api.AbstractLogger;
+import org.araqne.log.api.Log;
+import org.araqne.log.api.LogPipe;
+import org.araqne.log.api.LoggerSpecification;
+import org.araqne.log.api.LoggerStopReason;
+import org.araqne.log.api.MultilineLogExtractor;
+import org.araqne.log.api.Reconfigurable;
+import org.logpresso.ftp.FtpProfile;
+import org.logpresso.ftp.FtpProfileRegistry;
+import org.logpresso.ftp.FtpProfileRegistryListener;
+import org.logpresso.ftp.FtpRateLimitInputStream;
+import org.logpresso.ftp.FtpRateLimitService;
+import org.logpresso.ftp.FtpUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+public class FtpRotationFileLogger extends AbstractLogger implements LogPipe, Reconfigurable, FtpProfileRegistryListener {
+    private final Logger slog = LoggerFactory.getLogger(FtpRotationFileLogger.class);
+    private final File dataDir;
+    private String filePath;
+    private String realFilePath;
+    private FtpProfileRegistry profileRegistry;
+    private FtpRateLimitService limitService;
+    private String charset;
+    private MultilineLogExtractor extractor;
+    private FTPClient client;
+
+    public FtpRotationFileLogger(LoggerSpecification spec, org.araqne.log.api.LoggerFactory factory, FtpProfileRegistry profileRegistry, FtpRateLimitService limitService) {
+        super(spec, factory);
+        this.profileRegistry = profileRegistry;
+        this.limitService = limitService;
+        this.dataDir = new File(System.getProperty("araqne.data.dir"), "araqne-log-api");
+        this.dataDir.mkdirs();
+        this.init(this.getConfigs());
+    }
+
+    private void init(Map<String, String> c) {
+        MultilineLogExtractor extractor = new MultilineLogExtractor(this, this);
+        String datePatternRegex = (String)c.get("date_pattern");
+        if(datePatternRegex != null) {
+            extractor.setDateMatcher(Pattern.compile(datePatternRegex).matcher(""));
+        }
+
+        String dateLocale = (String)c.get("date_locale");
+        if(dateLocale == null) {
+            dateLocale = "en";
+        }
+
+        String dateFormatString = (String)c.get("date_format");
+        String timeZone = (String)c.get("timezone");
+        if(dateFormatString != null) {
+            extractor.setDateFormat(new SimpleDateFormat(dateFormatString, new Locale(dateLocale)), timeZone);
+        }
+
+        String beginRegex = (String)c.get("begin_regex");
+        if(beginRegex != null) {
+            extractor.setBeginMatcher(Pattern.compile(beginRegex).matcher(""));
+        }
+
+        String endRegex = (String)c.get("end_regex");
+        if(endRegex != null) {
+            extractor.setEndMatcher(Pattern.compile(endRegex).matcher(""));
+        }
+
+        this.charset = (String)c.get("charset");
+        if(this.charset == null) {
+            this.charset = "utf-8";
+        }
+
+        extractor.setCharset(this.charset);
+        this.filePath = (String)c.get("file_path");
+        this.extractor = extractor;
+    }
+
+    public void onUpdated(FtpProfile oldProfile, FtpProfile newProfile) {
+        if(newProfile.getName().equals(this.getConfigs().get("ftp_profile")) && (!oldProfile.getHost().equals(newProfile.getHost()) || oldProfile.getPort() != newProfile.getPort())) {
+            this.slog.info("logpresso ftp: ftp-rotation [{}] turn back to the initial state", this.getFullName());
+            this.setStates(new HashMap());
+        }
+
+    }
+
+    public void onConfigChange(Map<String, String> oldConfigs, Map<String, String> newConfigs) {
+        this.init(newConfigs);
+        if(!((String)oldConfigs.get("ftp_profile")).equals(newConfigs.get("ftp_profile")) || !((String)oldConfigs.get("file_path")).equals(newConfigs.get("file_path"))) {
+            this.setStates(new HashMap());
+        }
+
+    }
+
+    protected void onStop(LoggerStopReason reason) {
+        try {
+            this.slog.debug("logpresso ftp: force close client socket of logger [{}]", this.getFullName());
+            this.client.disconnect();
+        } catch (Throwable var3) {
+            ;
+        }
+
+    }
+
+    public void onLog(org.araqne.log.api.Logger logger, Log log) {
+        this.write(log);
+    }
+
+    public void onLogBatch(org.araqne.log.api.Logger logger, Log[] logs) {
+        this.writeBatch(logs);
+    }
+
+    protected void runOnce() {
+        FtpRotationFileLogger.FileInfo currentState = null;
+        Map state = this.getStates();
+        String firstLine = (String)state.get("first_line");
+        long lastPos = state.get("last_position") != null?Long.valueOf(state.get("last_position").toString()).longValue():0L;
+        long fileLength = state.get("file_length") != null?Long.valueOf(state.get("file_length").toString()).longValue():0L;
+        FtpRotationFileLogger.FileInfo lastState = new FtpRotationFileLogger.FileInfo(firstLine, lastPos, fileLength);
+        AtomicLong lastPosition = new AtomicLong(0L);
+        BufferedInputStream is = null;
+        this.client = null;
+        boolean opened = false;
+
+        try {
+            String e = (String)this.getConfigs().get("ftp_profile");
+            FtpProfile profile = this.profileRegistry.getProfile(e);
+            if(profile == null) {
+                throw new IllegalStateException("ftp profile not found: " + e);
+            }
+
+            this.slog.debug("logpresso ftp: ftp-rotation [{}] trying to connect [{}]", this.getFullName(), e);
+            this.client = new FTPClient();
+            FtpUtils.connect(this.client, profile);
+            currentState = this.getCurrentInfo(this.client);
+            if(currentState == null) {
+                return;
+            }
+
+            long offset = 0L;
+            if(lastState != null) {
+                if(currentState.firstLine != null && currentState.firstLine.equals(lastState.firstLine) && currentState.fileLength >= lastState.fileLength) {
+                    offset = lastState.lastPosition;
+                } else {
+                    offset = 0L;
+                }
+            }
+
+            lastPosition.set(offset);
+            if(offset < currentState.fileLength) {
+                try {
+                    this.client.disconnect();
+                } catch (Throwable var34) {
+                    this.slog.warn("logpresso ftp: unexpected exception while closing client after readFirstLine from [" + this.getFullName() + "]: " + var34.getMessage());
+                    this.slog.debug("logpresso ftp: exception detail: ", var34);
+                }
+
+                FtpUtils.connect(this.client, profile);
+                if(offset != 0L) {
+                    this.client.setRestartOffset(offset);
+                }
+
+                String limitProfileName = (String)this.getConfigs().get("rate_limit");
+                this.slog.debug("logpresso ftp: ftp-rotation [{}] loading file [{}]", this.getFullName(), this.realFilePath);
+                InputStream is1 = this.client.retrieveFileStream(this.realFilePath);
+                opened = true;
+                if(limitProfileName != null) {
+                    is = new BufferedInputStream(new FtpRateLimitInputStream(is1, limitProfileName, this.limitService));
+                } else {
+                    is = new BufferedInputStream(is1);
+                }
+
+                this.extractor.extract(is, lastPosition);
+                this.setTemporaryFailure((Throwable)null);
+                return;
+            }
+
+            this.slog.debug("logpresso ftp: ftp-rotation [{}] no more data from file [{}]", this.getFullName(), this.realFilePath);
+        } catch (Throwable var35) {
+            this.setTemporaryFailure(var35);
+            this.slog.error("logpresso ftp: ftp rotation logger [" + this.getFullName() + "] cannot read file", var35);
+            return;
+        } finally {
+            if(is != null) {
+                try {
+                    is.close();
+                } catch (IOException var33) {
+                    ;
+                }
+            }
+
+            if(currentState != null) {
+                this.updateState(currentState.firstLine, currentState.fileLength, lastPosition.get());
+            }
+
+            try {
+                if(opened && !this.client.completePendingCommand()) {
+                    this.slog.error("logpresso ftp: logger [{}] failed to complete pending command", this.getFullName());
+                }
+            } catch (IOException var32) {
+                this.slog.error("logpresso ftp: logger [{}] cannot complete pending command", this.getFullName());
+            }
+
+            FtpUtils.disconnect(this.client);
+            this.client = null;
+        }
+
+    }
+
+    public void updateState(String firstLine, long fileLength, long lastPosition) {
+        HashMap m = new HashMap();
+        m.put("first_line", firstLine);
+        m.put("last_position", Long.valueOf(lastPosition));
+        m.put("file_length", Long.valueOf(fileLength));
+        this.setStates(m);
+    }
+
+    private String readFirstLine(InputStream is) {
+        BufferedReader br = null;
+
+        Object var4;
+        try {
+            br = new BufferedReader(new InputStreamReader(is, this.charset));
+            String t = br.readLine();
+            return t;
+        } catch (Throwable var18) {
+            this.slog.error("logpresso ftp: cannot read first line, ftp-rotation logger [" + this.getFullName() + "]", var18);
+            var4 = null;
+        } finally {
+            if(br != null) {
+                try {
+                    br.close();
+                } catch (IOException var17) {
+                    ;
+                }
+            }
+
+            if(is != null) {
+                try {
+                    is.close();
+                } catch (IOException var16) {
+                    ;
+                }
+            }
+
+        }
+
+        return (String)var4;
+    }
+
+    protected File getLastLogFile() {
+        return new File(this.dataDir, "ftp-rotation-" + this.getName() + ".lastlog");
+    }
+
+    private FtpRotationFileLogger.FileInfo getCurrentInfo(FTPClient client) throws IOException {
+        long fileSize = 0L;
+        this.realFilePath = this.filePath;
+        boolean found = false;
+
+        while(true) {
+            this.slog.debug("logpresso ftp: checking path [{}]", this.realFilePath);
+            FTPFile firstLine = this.findFile(client, this.realFilePath);
+            if(firstLine == null) {
+                break;
+            }
+
+            if(firstLine.isFile()) {
+                fileSize = firstLine.getSize();
+                found = true;
+                this.slog.debug("logpresso ftp: found path [{}] size [{}]", this.realFilePath, Long.valueOf(fileSize));
+                break;
+            }
+
+            if(!firstLine.isSymbolicLink()) {
+                break;
+            }
+
+            int e = this.realFilePath.lastIndexOf(47);
+            if(e < 0) {
+                break;
+            }
+
+            String oldPath = this.realFilePath;
+            this.realFilePath = this.realFilePath.substring(0, e + 1) + firstLine.getLink();
+            if(oldPath.equals(this.realFilePath)) {
+                break;
+            }
+
+            this.slog.debug("logpresso ftp: symlink found path [{}] link [{}]", this.realFilePath, firstLine.getLink());
+        }
+
+        if(!found) {
+            this.slog.debug("logpresso ftp: rotation logger [{}] file [{}] not found", this.getFullName(), this.filePath);
+            return null;
+        } else {
+            String firstLine1 = null;
+
+            try {
+                InputStream e1 = client.retrieveFileStream(this.realFilePath);
+                firstLine1 = this.readFirstLine(e1);
+            } catch (IOException var15) {
+                this.slog.error("logpresso ftp: logger [{}] cannot complete pending command", this.getFullName());
+            } finally {
+                try {
+                    if(!client.completePendingCommand()) {
+                        this.slog.debug("logpresso ftp: logger [{}] failed to complete pending command, reply [{}]", this.getFullName(), client.getReplyString());
+                    }
+                } catch (IOException var16) {
+                    if(var16 instanceof FTPConnectionClosedException) {
+                        this.slog.debug("logpresso ftp: logger [{}] cannot complete pending command", this.getFullName());
+                        this.slog.debug("logpresso ftp: exception detail: ", var16);
+                    } else {
+                        this.slog.error("logpresso ftp: logger [{}] cannot complete pending command: {}", this.getFullName(), var16.getMessage());
+                        this.slog.debug("logpresso ftp: exception detail: ", var16);
+                    }
+                }
+
+            }
+
+            return new FtpRotationFileLogger.FileInfo(firstLine1, 0L, fileSize);
+        }
+    }
+
+    private FTPFile findFile(FTPClient client, String path) throws IOException {
+        FTPFile[] files = client.listFiles(path);
+        return files != null && files.length != 0?files[0]:null;
+    }
+
+    private class FileInfo {
+        private String firstLine;
+        private long lastPosition;
+        private long fileLength;
+
+        public FileInfo(String firstLine, long lastPosition, long lastLength) {
+            this.firstLine = firstLine;
+            this.lastPosition = lastPosition;
+            this.fileLength = lastLength;
+        }
+    }
+}
