@@ -12,4 +12,8 @@
 ■ 로그프레소 tohex()를 통해 변환된 Hexa Code : 상기 코드 일부가 "efbfbd"로 변환되어 나타납니다.
 06efbfbd000033efbfbdefbfbd00efbfbd560000efbfbd560000efbfbd090000efbfbd0900000731363035353737 
 
+■ 사용 쿼리 (인코딩 방식을 바꿔가면 진행할때, "efbfbd"가 적절히 다른형태로 바뀌어 나타나게 됩니다.)
+textfile cs=euc-kr test\1.svd
+| eval line=tohex((encode(line, "euc-kr")))
+
 감사합니다.
