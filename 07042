@@ -1,0 +1,10 @@
+<P4ABC1>
+      <Service>5421</Service>
+      <Daemon>10.144.69.216:7500</Daemon>
+      <Network>10.144.69.216</Network>
+      <Subject>M12.TEST.MES.NC.LOGPRESSO</Subject>
+	  <RemoteSubject>M12.TEST.MES.NC.*.*</RemoteSubject>
+      <Command>EDSEDB_DCOL</Command>
+      <UseYN>Y</UseYN>
+    </P4ABC1>    
+    <Log>Y</Log>
