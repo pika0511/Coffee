@@ -1,0 +1,84 @@
+package temp;
+
+import java.io.EOFException;
+import java.io.IOException;
+import java.io.RandomAccessFile;
+import java.nio.ByteBuffer;
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.swing.plaf.synth.SynthSeparatorUI;
+
+public class OesParser {
+
+	public static void main(String[] args) {
+		
+		String fileName = "C:/Program Files (x86)/Logpresso/test/1.svd";
+		parser(fileName);
+	}
+	
+	public static void parser(String wtmpFile){
+		
+		RandomAccessFile raf = null;
+		
+		try {
+
+			raf = new RandomAccessFile(wtmpFile, "r");	//readonly 타입으로 생성
+			byte[] block = new byte[4];
+			raf.seek(8);
+			raf.read(block, 0, 4);
+			StringBuilder tmp = new StringBuilder();
+			for (int i = block.length-1; i >= 0; i--) {
+				/*System.out.println(String.format("%02x", block[i]&0xff));*/
+				tmp.append(String.format("%02x", block[i]&0xff));
+			}
+			System.out.println("헥사코드 주소 : " + tmp.toString());
+			System.out.println("십진수 인덱스 : " + Long.parseLong(tmp.toString(), 16));
+			Long startPos = Long.parseLong(tmp.toString(), 16) + 104;
+			System.out.println("+104 인덱스: " + startPos);
+			
+			raf.seek(startPos+4);
+			byte[] result = new byte[2402];
+			int size = raf.read(result, 0, 2402);
+			StringBuilder tempLine = new StringBuilder();
+			String space = ", ";
+			String equal = "=";
+			String nanoMeter = "nm";
+			int initValue = 200;
+			for (int i = 0, j = result.length; i < j; i+=2){
+			/*System.out.println(String.format("%02x", result[i]&0xff) + ", " + result[i]);*/
+				if(i != j-2){
+					tempLine.append(String.valueOf(initValue + i*0.25));
+					tempLine.append(nanoMeter);
+					tempLine.append(equal);
+					tempLine.append(String.valueOf(Long.parseLong(String.format("%02x", result[i]&0xff), 16)));
+					tempLine.append(space);
+				}else{
+					tempLine.append(String.valueOf(initValue + i*0.25));
+					tempLine.append(nanoMeter);
+					tempLine.append(equal);
+					tempLine.append(String.valueOf(Long.parseLong(String.format("%02x", result[i]&0xff), 16)));
+				}
+			}
+			
+			System.out.println("읽어낸 바이트 수 : " + size);
+			System.out.println("line : " + tempLine.toString());
+			String line = tempLine.toString();
+			Map<String, Object> data = new HashMap<String, Object>();
+			data.put("line", line);
+			
+		} catch (EOFException e) {
+			System.out.println("EOF Exception");
+		} catch (Throwable t) {
+			System.out.println("Exception : " + t);
+		} finally {
+			if (raf != null) {
+				try {
+					raf.close();
+					
+				} catch (IOException e) {
+				}
+			}
+		}
+	}
+}
