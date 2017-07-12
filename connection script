@@ -1,0 +1,16 @@
+#!/bin/bash
+
+con_state=""
+if [ "$1" = "start" ]
+then
+while [ 1 ]
+do
+con_state=`netstat -a | grep -i established | grep "10.25.204.149" | grep ftp | grep -v "ftp-data" | wc -l`
+echo "[$(date +%Y-%m-%d%t%T)] netstat ${con_state}" >> ./ftp_conn_149.log
+sleep 1
+done
+elif [ "$1" = "stop" ]
+then
+con_state=`pkill -9 -f ftploggen_149_net.sh`
+echo $con_state
+fi
