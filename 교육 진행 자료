@@ -1,0 +1,168 @@
+★★★ 정정 내용 ★★★
+■ _id : 유일키가 아니다, _table, _id, _time 조합이 유일키이다.
+	→ _id는 데이터가 테이블에 쓰여질때 생성된다.(메모리상에 있을때의 시퀀스번호에 해당한다.)
+■ (?<name>) 표현은 정규표현식의 일반적인 표현이다.
+★★★ 정정 내용 ★★★
+
+■ 개발 절차
+ - 로그 수집 방식 결정(ftp/sftp/jdbc로거/하둡/...)(디렉터리 와쳐, 일자별 디렉터리, 로테이션 로그파일)
+ - 로그 유형 분석
+ - 파싱
+ 
+■ 수집
+ip   : 177.99.33.16
+port : 221
+user : miuser
+pw   : 64776189
+ - ftp 프로파일 작성
+ - sftp 프로파일 작성
+
+
+■ TAGNAME=="P"인 파서 만들기
+(\d{4}\/\d{2}\/\d{2} \d{2}:\d{2}:\d{2})\s+\<(?<TAGNAME>\S+)\>\s+(?<PARAMETER>.*)\s+\=\s+(?<VALUE>[\d+\.\s+]+|\S+)\s+(?<UNIT>\D+)*
+
+■ wafer X, Y, Theta 평균, 표준편차 구하기
+table mi
+| search PARAMETER=="Wafer Center Offset"
+| parsekv field=VALUE overlay=true pairdelim="," kvdelim="="
+| fields - _host, _id, _table, _time, TAGNAME, UNIT, VALUE, PARAMETER, line
+| eval THETA=double(WaferPositionOnChuckInTheta), X=round(double(WaferPositionOnChuckInX),3), Y=round(double(WaferPositionOnChuckInY),3)
+| stats avg(X) as X 평균, avg(Y) as Y 평균, avg(THETA) as THETA 평균, stddev(X) as X 표준편차, stddev(Y) as Y 표준편차, stddev(THETA) as THETA 표준편차
+
+■ 파싱 -> 평균 (PARAMETER=="THGhoursForAllSpots")
+ ※ seq()는 정렬이 매번 다를 경우, 다른순서대로 매겨진다.
+table mi
+| eval no= seq()
+| search PARAMETER=="THGhoursForAllSpots"
+| eval splitValue = split(VALUE, " ")
+| fields splitValue, no
+| explode splitValue
+| eval splitValue = replace(splitValue, "\r\n", ""), splitValue = double(splitValue)
+| search splitValue != 0.0
+| stats avg(splitValue) by no
+
+■ 상관관계 구하기
+1. 테이블 조회
+table mi
+
+2. value1 조회
+table mi
+| search PARAMETER=="Ida_R3*" | eval VOLTAGE1=double(VALUE), key=seq()  | fields VOLTAGE1, key
+
+3. value2 조회
+table mi
+| search PARAMETER=="Ida_R7*" | eval VOLTAGE2=double(VALUE), key=seq() | fields VOLTAGE2, key
+
+4. value1 & value2 -> join
+table mi
+| search PARAMETER=="Ida_R3*"
+| eval VOLTAGE1=double(VALUE)
+| eval key=seq()
+| fields VOLTAGE1, key
+| join type=full key [table mi | search PARAMETER=="Ida_R7*" | eval VOLTAGE2=double(VALUE), key=seq() | fields VOLTAGE2, key]
+
+5. null값 체크
+table mi
+| search PARAMETER=="Ida_R3*"
+| eval VOLTAGE1=double(VALUE)
+| eval key=seq()
+| fields VOLTAGE1, key
+| join type=full key [table mi | search PARAMETER=="Ida_R7*" | eval VOLTAGE2=double(VALUE), key=seq() | fields VOLTAGE2, key]
+| search isnull(VOLTAGE1) or isnull(VOLTAGE2)
+
+NULL값이 있다!!! -> VOLTAGE2의 RAW DATA확인
+
+6. VOLTAGE2의 RAW DATA확인
+table mi
+| search PARAMETER=="Ida_R7*" | eval VOLTAGE2=double(VALUE), key=seq() | fields VOLTAGE2, key, line
+| search isnull(VOLTAGE2)
+
+-> 확인 결과, RAW DATA에 NULL 값이 들어가 있음을 확인
+
+7. 상관계수 구하기
+table mi
+| search PARAMETER=="Ida_R3*"
+| eval VOLTAGE1=round(double(VALUE),3)
+| eval key=seq()
+| fields VOLTAGE1, key
+| join type=full key [table mi | search PARAMETER=="Ida_R7*" | eval VOLTAGE2=round(double(VALUE),3), key=seq() | fields VOLTAGE2, key]
+|# search isnull(VOLTAGE1) or isnull(VOLTAGE2)
+| stats corr(VOLTAGE1, VOLTAGE2) as corr
+| eval corr = round(corr,2)
+-> 값이 -0.03 -> VOLTAGE1 & VOLTAGE2 선형관계가 없는 것으로 확인되었다.
+
+■ 통계값 조인하기
+1. 평균구하기
+table mi
+| search TAGNAME == "P"
+| search PARAMETER=="Ida*Temperature"
+| sort PARAMETER
+| eval VALUE = double(VALUE)
+|# stats avg(VALUE) by PARAMETER 
+| stats stddev(VALUE) by PARAMETER
+| join PARAMETER []
+2. 표준편차 구한 쿼리결과와 조인하기
+table mi
+| search TAGNAME == "P"
+| search PARAMETER=="Ida*Temperature"
+| sort PARAMETER
+| eval VALUE = double(VALUE)
+| stats avg(VALUE) by PARAMETER 
+|# stats stddev(VALUE) by PARAMETER
+3. 조인 쿼리
+table mi
+| search TAGNAME == "P"
+| search PARAMETER=="Ida*Temperature"
+| sort PARAMETER
+| eval VALUE = double(VALUE)
+|# stats avg(VALUE) by PARAMETER 
+| stats stddev(VALUE) by PARAMETER
+| join PARAMETER [table mi
+	| search TAGNAME == "P"
+	| search PARAMETER=="Ida*Temperature"
+	| sort PARAMETER
+	| eval VALUE = double(VALUE)
+	| stats avg(VALUE) by PARAMETER 
+	|# stats stddev(VALUE) by PARAMETER]
+
+4.BOXPLOT 그리기
+table mi
+| search TAGNAME == "P"
+| search PARAMETER=="Ida*Temperature"
+| sort PARAMETER
+| eval VALUE = double(VALUE)
+|# stats avg(VALUE) by PARAMETER 
+| stats stddev(VALUE) by PARAMETER
+| join PARAMETER [table mi
+| search TAGNAME == "P"
+| search PARAMETER=="Ida*Temperature"
+| sort PARAMETER
+| eval VALUE = double(VALUE)
+| stats avg(VALUE) by PARAMETER 
+|# stats stddev(VALUE) by PARAMETER]
+| join PARAMETER [table mi
+| search TAGNAME == "P"
+| search PARAMETER=="Ida*Temperature"
+| sort PARAMETER
+| eval VALUE = double(VALUE)
+|# stats avg(VALUE) by PARAMETER 
+|# stats stddev(VALUE) by PARAMETER
+| boxplo t VALUE by PARAMETER]
+
+■ 웹쿼리
+http://localhost:8888/logpresso/httpexport/query?_apikey=297dd14c-35e8-f7c1-4093-2c68ded2f5c7&_q=table sys_query_logs | limit 200
+
+
+
+
+액티브 모드 : 클라이언트에서 서버측 21번 포트로 접속시도 하고 데이터 포트는 서버에서 클라이언트로 접속하여 데이터를 보내는 방식
+서버 커맨드 포트     - 21
+서버 데이터 포트     - 20 에서 데이터 통신을 위한 클라이언트로 접속시도
+클라이언트 커맨드 포트 - 5150 - 서버 21포트로 접속시도하여 자신의 데이터 포트 알려줌
+클라이언트 데이터 포트 - 5151
+
+패시브 모드 : 클라이언트에서 서버측 21번 포트로 접속시도 하고 데이터 포트도 클라이언트에서 서버의 21번 포트로 접속하여 데이터를 받아오는 방식
+서버 커맨드 포트     - 21 - 데이터를 전송해줄 데이터 포트를 ack신호와 함께 알려줌
+서버 데이터 포트     - 비특권 포트(1024 ~ 65535)를 모두 열어둬야 함
+클라이언트 커맨드 포트 - 5150
+클라이언트 데이터 포트 - 5151 에서 데이터 통신을 위해 서버 데이터 포트로 접속시도
