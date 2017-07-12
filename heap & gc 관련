@@ -1,0 +1,22 @@
+힙의 구체 영역 : http://drkein.tistory.com/95
+힙의 영역별 gc 알고리즘 : http://d2.naver.com/helloworld/1329
+gc 모니터링 : http://d2.naver.com/helloworld/6043
+java interal : http://d2.naver.com/helloworld/1230
+g1 gc : http://logonjava.blogspot.kr/2015/08/java-g1-gc-full-gc.html
+
+?새로 생성한 대부분의 객체는 Eden 영역에 위치한다.
+?Eden 영역에서 GC가 한 번 발생한 후 살아남은 객체는 Survivor 영역 중 하나로 이동된다. 
+?Eden 영역에서 GC가 발생하면 이미 살아남은 객체가 존재하는 Survivor 영역으로 객체가 계속 쌓인다. 
+?하나의 Survivor 영역이 가득 차게 되면 그 중에서 살아남은 객체를 다른 Survivor 영역으로 이동한다. 그리고 가득 찬 Survivor 영역은 아무 데이터도 없는 상태로 된다. 
+?이 과정을 반복하다가 계속해서 살아남아 있는 객체는 Old 영역으로 이동하게 된다. 
+ ※ old 영역으로 전환되는 기준은 무엇인가?
+
+
+old 영역 gc 알고리즘
+ Old 영역의 GC는 mark-sweep-compact이라는 알고리즘을 사용한다.
+이 알고리즘의 첫 단계는 Old 영역에 살아 있는 객체를 식별(Mark)하는 것이다. 그 다음에는 힙(heap)의 앞 부분부터 확인하여 살아 있는 것만 남긴다(Sweep). 마지막 단계에서는 각 객체들이 연속되게 쌓이도록 힙의 가장 앞 부분부터 채워서 객체가 존재하는 부분과 객체가 없는 부분으로 나눈다(Compaction).  
+1. serial gc
+2. parallel gc
+3. parallel old gc (parallel compacting gc)
+4. concurrent mark & sweep gc (cms gc)
+5. g1 gc
