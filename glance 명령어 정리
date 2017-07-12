@@ -1,0 +1,127 @@
+1. Glance 의 소개
+
+- Glance는 HP-UX 상에서 강력하면서도 쉽게 사용할 수 있는 Systerm performance monitor 툴이다. Glance는 Systerm 자원과 Active processes에 대한 일반적인 정보와 CPU, 메모리, Disk IO, Network, NFS, System Calls, Swap 또 System Table 화면을 통해 더욱 특수한 정보를 제공해 주며, Glance를 터미널 환경에서 실행함으로써 HP 9000 시리즈의 Performance problem의 분석을 도울 수 있다.
+ 
+2. Options 
+
+-j interval : 스크린 refresh 간격을 초 단위로 설정한다. interval의 범위는 2에서 32767 사이이다.
+-p [dest] : 데이터를 출력할 디바이스를 설정한다. 기본값은 기본 lp device이다.
+-f dest : 데이터를 출력할 파일을 설정한다.
+-maxpages numpages : p 명령으로 출력할 최대 페이지 수를 바꾼다.
+-command : 3절에서 소개되는 command 를 이용하여 다른 initial screen을 볼 수 있도록 한다. command들 중 일부(첫번째 섹션)만이 이 옵션에 사용될 수 있다.
+-nice nicevalue : Glance 프로세스에 대한 nice priority를 설정할 수 있게 한다. 기본 값은 -10이다.
+-nosort : 소트를 하지 않는다. 이에 따라 CPU overhead가 줄어든다.
+-lock : Glance 가 메모리에 lock시킨다. 이 옵션을 사용함으로써 response time 이 향상 되나 에러가 발생할 수 있다.
+-adviser_off : Adviser없이 Glance를 실행 시킨다.
+-adviser_only : Adviser만을 stdout을 통하여 보여준다. stdout을 파일로 redirection 하여 Glance Adviser가 백그라운드로 돌게 할 수 있다.
+-iterations count : Glance 가 실행되는 최대 횟수를 지정할 수 있다. Glance는 count에 지정된 수 만큼 실행되고 중단된다. count는 2이상이어야 하며, 2 이하일 때는 2번 실행하게 된다.
+-syntax filename : Adviser에 의해 사용될 Syntax 파일을 지정한다. 파일을 지정하지 않 을 경우 '~/adviser.syntax'파일을 사용하고 이 파일이 없을 경우 /var/opt/perf/adviser.syntax 파일을 사용하게 된다.
+-disks n, -kernel path, -nfs n, -pids n : mideavom의 초기값들을 설정하는 데 사용된다
+
+
+
+
+3. Glance 의 사용
+
+[ GlancePlus Commands Menu ]
+ 
+c - CPU Report
+m - Memory Report
+d - Disk Report
+g - Process List
+a - CPU By Proceassor
+s - Select Process
+y - Renice Process
+w - Swap Space
+i - IO By File System
+u - IO By Disk
+v - IO By Logical Volume
+t - System Tables
+n - NFS By System
+l - Network By Interface
+h - Online Help
+q - exit (or e)
+
+B - Global Waits
+Z - Global Threads
+Y - Global System Calls
+G - Process Threads
+F - Process Open Files
+M - Process Memory Regions
+R - Process Resources
+W - Process Wait States
+L - Process System Calls
+I - Thread Resource
+J - Thread Wait
+S - Select Disk/NFS/Appl/Trans/Thread
+N - NFS Global Activity
+T - Trans Tracker
+H - Alarm History
+A - Application List
+P - PRM Group List
+
+[ GlancePlus Control Key Menu ]
+h - Online Help
+? - Commands Menu
+b - Page Backward (or -)
+f - Page Forward (or +,space)
+! - Invoke Shell
+p - Print Toggle
+j - Adjust Interval
+r - Refresh Screen (or ^L)
+o - Threshold Screen Options
+< - Display Previous Screen
+> - Display Next Logical Scr
+z - Reset Statistics to Zero
+<cr>- Update Current Screen
+q - exit (or e )
+ 
+4. Q&A
+
+
+
+Q: glance에서 buffer cache의 size가 display되게 하려면? 
+A: $ glance ?m 
+
+Q: motif base의 glance를 display 하려면? 
+A:/usr/perf/bin/gpm 을 하면 됩니다. s800 의 경우에는 DISPLAY=xterm:0.0 ;export DISPLAY 를 setup해야 합니다. 
+
+Q: kill로 죽인 process가 ps -ef 에는 나타나지 않지만 glance로 보면 살아있는 것처럼 보입니다. 
+A: /usr/perf/bin/midaemon 를 다시 restart하십시요. # ps -ef | grep midaemon #kill #/usr/perf/bin/midaemon 
+
+Q: glance를 실행하면 UNABLE TO INITIALIZE YOUR TERMINAL이라는 error가 발생합니다. 
+A: glance는 terminal이 80x24가 되어야 작동합니다. stty -a를 하시면 다음 정보를 볼수 있습니다. 
+speed 9600 baud; line = 0; susp = ^Z; dsusp = ^@ 
+rows = 0; columns = 80 
+intr = ^C; quit = ^\; erase = ^H; kill = ^U; swtch = ^@ 
+위에서 rows와 columns를 보면 rows가 0임을 알수 있습니다. 
+rows를 다음과 같이 수정합니다. 
+#stty rows 24 
+다시 glance를 실행하시면 됩니다. 
+
+Q: glance 실행시 아래와 같은 error message가 뜹니다. 
+== Fatal Nums Error == $Header: db.C,v 1.200 95/05/11 13:45:02 smead Exp $ == 
+User: root Date: Tue Sep 12 15:08:52 
+File: nums.C Line: 414 Product id: Gpm 
+System: ov-serve B.10.01 9000/819 
+Midaemon not responding [MI_SHARED:] 
+== End of Error Msg ============================= 
+A: 먼저 midaemon을 명령행에서 실행시킵니다. 
+# /opt/perf/bin/midaemon 
+여전히 error가 발생하면 /var/opt/perf/datafiles directory가 존재하는지 확인후 만약 없으면 mkdir로 만들어 줍니다. 
+# cd /var/opt/perf 
+# mkdir datafiles 
+# chmod 777 datafiles 
+# chown bin:bin datafiles 
+glance를 실행시키면 정상적으로 동작할 것입니다.
+
+
+
+
+5. glance와 top, sar, vmstat의 실행결과가 차이 나는 이유
+
+- 데이터를 가져오는 방식(top, sar = sampling / glance =trace )과 참조하는 라이브러리 및 인터벌의 차이로 인해 발생한다. top, sar는 %wio가 CPU 사용율에 포함이 되거나, shared memory 사용량이 메모리 사용률에 포함이 되지 않는다. 쉽게 말해, 짧게 일하고 바로 sleep 상태로 빠지는 프로세스들의 activity를 catch하지 못하기 때문에 실제로 CPU 사용시간에 제외 되어야 하는 wio가 top, sar, vmstat에는 포함이 되어 있다. 이런 차이로 인해 glance와 실행결과가 다르게 보인다.
+
+결론적으론 glance가 정확하다.
+
+
