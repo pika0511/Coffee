@@ -1,0 +1,45 @@
+while [ 1 ]; do ps -ef | grep "ftpd:" | grep -v "grep" | grep mcsadm | wc -l ; sleep 1; done
+while [ 1 ]; do ps -ef | grep "ftpd:" | grep -v "grep" | grep mcsadm ; sleep 1; done
+
+while [ 1 ]; do ps -ef | grep "sshd:" | grep -v "pts" | grep -v "grep"  ; sleep 1; done
+while [ 1 ]; do ps -ef | grep "sshd:" | grep -v "pts" | grep -v "grep"  | wc -l; sleep 1; done
+
+while [ 1 ]; do netstat -an | grep "*.22" | grep -v "*.22003" | grep -v "tcp6" | wc -l ; sleep 1; done
+while [ 1 ]; do netstat -an | grep "*.22" | grep -v "*.22003" | grep -v "tcp6"; sleep 1; done
+netstat -an | grep "*.22" | grep -v "*.22003" | grep -v "tcp6"
+netstat -a | grep "*.22" | grep -v "*.22003"
+
+while [ 1 ]; do netstat -a | grep -i established | grep  "10.25.224.149" | grep ftp ; sleep 1; done
+while [ 1 ]; do netstat -a | grep -i established | grep  "10.25.224.149" | grep ftp | wc -l ; sleep 1; done
+
+
+while [ 1 ]; do netstat -a | grep -i established | grep  "10.25.204.149" | grep ftp; sleep 1; done
+while [ 1 ]; do netstat -a | grep -i time_wait | grep  "10.25.204.149" | grep ftp ; sleep 1; done
+
+perl loggen.pl 30000 TS11.log S1.log S2.log &
+
+perl loggen.pl 30000 TS12.log S1.log S2.log &
+
+perl loggen.pl 30000 TS13.log S1.log S2.log &
+
+perl loggen.pl 30000 TS14.log S1.log S2.log &
+
+perl loggen.pl 30000 TS15.log S1.log S2.log &
+
+pgrep -f araqne-core
+
+149 서버
+jstack 13217 > /home/mcslog/jstack1.txt
+jstack 13217 > /home/mcslog/jstack2.txt
+jstack 13217 > /home/mcslog/jstack3.txt
+jstack 13217 > /home/mcslog/jstack4.txt
+jstack 13217 > /home/mcslog/jstack5.txt
+
+150 서버
+jstack 21236 > /home/mcslog/jstack1.txt
+jstack 21236 > /home/mcslog/jstack2.txt
+jstack 21236 > /home/mcslog/jstack3.txt
+jstack 21236 > /home/mcslog/jstack4.txt
+jstack 21236 > /home/mcslog/jstack5.txt
+
+java.lang.OutOfMemoryError: Java heap space
