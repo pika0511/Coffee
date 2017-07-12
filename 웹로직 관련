@@ -1,0 +1,84 @@
+$DOMAIN_HOME/bin/setDomainEnv.sh
+: 웹로직 기동에 필요한 라이브러리를 CLASSPATH로 설정하고 기타 도메인 시작에 필요한 설정을 수행하는 스크립트
+: 개발모드/운영모드 확인 가능
+
+$DOMAIN_HOME/config/config.xml
+: 개발모드/운영모드 확인 가능
+: 콘솔에서 추가한 설정이 기록됨, 어드민 서버에 의해 관리됨
+
+$DOMAIN_HOME/startWebLogic.sh
+: 웹로직 어드민 서버 실행
+
+$DOMAIN_HOME/bin/startManagedWebLogic.sh
+: 매니지드 서버 실행
+: startManagedWebLogic.sh [managed server name] [admin url]
+: startManagedWebLogic.sh Managed01 t3://127.0.0.1:7001
+
+$DOMAIN_HOME/servers/서버이름/security/boot.properties
+: 서버 기동시마다 IP, PW를 물어보는 것을 방지 
+
+export USER_MEM_ARGS="... ..."
+: 자바옵션설정
+
+export EXT_PRE_CLASSPATH="..."
+export EXT_POST_CLASSPATH="..."
+: CLASSPATH 설정
+
+nohup ./startWebLogic.sh &
+: 로그아웃이나 터미널 종료에도 실행을 유지
+
+ps -ef | grep <server name> 
+
+startMCSM1.sh
+startMCSM2.sh
+: 스크립트 내용보고 확인 필요
+
+로그의 종류
+: 콘솔로그와 서버로그
+
+서버로그의 경로
+: $DOMAIN_HOME/servers/서버이름/logs/xxx.log
+
+
+$DOMAIN_HOME/startAdmin.sh 예제
+============================================================================
+SERVER_NAME=1036Admin
+DOMAIN_HOEM=/app/wls/wls1036/domains/v1036domain
+LOG_DIR=$DOMAIN_HOME/logs
+
+export USER_MEM_ARGS="-D$SERVER_NAME -Xms512m -Xmx512m -XX:MaxPermSize=256m"
+export EXT_PRE_CLASSPATH=""
+export EXT_POST_CLASSPATH=""
+
+mv $LOG_DIR/$SERVER_NAME.out $LOG_DIR/$SERVER_NAME.`date + '%m%d_%H%M%S'`
+nohup ./startWebLogic.sh > $LOG_DIR/$SERVER_NAME.out 2>&1 &
+============================================================================
+
+$DOMAIN_HOME/startM1.sh 예제
+============================================================================
+SERVER_NAME=Managed01
+DOMAIN_HOEM=/app/wls/wls1036/domains/v1036domain
+LOG_DIR=$DOMAIN_HOME/logs
+
+export USER_MEM_ARGS="-D$SERVER_NAME -Xms512m -Xmx512m -XX:MaxPermSize=256m"
+export EXT_PRE_CLASSPATH=""
+export EXT_POST_CLASSPATH=""
+
+mv $LOG_DIR/$SERVER_NAME.out $LOG_DIR/$SERVER_NAME.`date + '%m%d_%H%M%S'`
+nohup ./bin/startManagedWebLogic.sh $SERVER_NAME t3://192.168.0.33:7001 > $LOG_DIR/$SERVER_NAME.out 2>&1 &
+============================================================================
+
+$DOMAIN_HOME/stopAdmin.sh 예제
+============================================================================
+. ./bin/setDomainEnv.sh
+java weblogic.Admin -url t3://192.168.0.33:7001 -username weblogic -password
+welcome1 FORCESHUTDOWN
+============================================================================
+
+JVisualVM 설치
+http://visualvm.java.net
+
+Java Mission Control 설치를 권장
+
+TDA 대신 ThreadLogic 설치를 권장
+http://java.net/projects/threadlogic/downloads
