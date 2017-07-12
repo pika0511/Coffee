@@ -1,0 +1,77 @@
+# TCP dump
+: 가장 오랜된 텍스트 기반 패킷 분석기
+
+ 설치확인
+# rpm -qa | grep tcpdump
+# tcpdump --help
+
+ 설치
+# yum install tcpdump
+
+# tcpdump [옵션] [expression]
+[옵션]
+  -c : 카운트  (해당 패킷만큼 받고 중지)
+  -i : interface (모니터링 할 네트워크 인터페이스)
+  -n : 모든 주소들을 번역하지 않는다(port,host address 등등)
+  -q : 프로토콜에 대한 정보를 덜 출력한다. 따라서 출력되는 라인이 좀 더 짧아진다.
+  -w : 저장
+  -r : 불러오기 
+  -s : 크기
+  -t : 타임 스탬프 생략
+  -v : 좀 더 많은 정보들을 출력한다.
+  -vv: '-v'보다 좀 더 많은 정보들을 출력한다.
+  -x : 각각의 패킷을 헥사코드로 출력한다.
+  -X : ascii /hex 동시 출력
+  -s : absolute seq.
+
+[expression] : 방향있음
+ ex) src(소스주소), dst(목적지주소)
+  tcpdump -i eth0 src 192.168.10     => 소스패킷 이것만 잡겠다.
+  
+ ex) port , protocol
+        tcpdump -i eth0 port 
+ ex) and, or
+          tcpdump -i eth0 port 80 and src 192.168.102.20
+ ex) host, net
+           tcpdump -i eth0
+           tcpdump -i eth1
+           tcpdump -c 10      
+           tcpdump -w web.log port 80 :: 포트 80에 대한 패킷만 잡아서 저장
+ ex) 파일로 저장
+  tcpdump -i eth0 -w cap01.pkt    => 해당 인터페이스로 들어오는 패킷을 파일로 저장
+
+
+
+
+===윈도우 환경에서 tcpdump 사용===
+windump 란?
+기존 리눅스/유닉스 에서 사용했던 tcpdump를 윈도우 환경에서 사용할 수 있도록 포팅한 것으로
+DOS환경에서 사용 할 수있는 네트워크 툴
+
+설치방법
+1. winpcap 설치
+2. c:\windows\system32  하위에 windump.exe 파일을 copy
+
+windump [옵션]
+[옵션]
+-a 네트워크와 브로드 캐스트 주소이름 변경
+
+-B size 수신 버퍼크기를 size로 수정
+
+-c count 만큼만 패킷 수집
+
+-D 네트워크 인터페이스 출력
+
+-F file file에 정의된 필터를 적용
+
+-q 패킷을 간단한 형태로출력
+
+-t 각 라인에 시간을 출력하지 않음
+
+-i 모니터링할 네트워크 인터페이스 지정
+
+-n 주소를 이름으로 변하지 않도록 설정
+
+-s 덤프할 패킷의 시작 오프셋
+
+-S tcp 절대 일련 번호 출력
