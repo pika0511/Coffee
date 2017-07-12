@@ -1,0 +1,668 @@
+■ 기본 명령어
+===ls===
+
+ls
+현재 디렉터리의 파일 목록.
+
+ls /etc/sysconfig
+/etc/sysconfig 디렉터리의 목록.
+
+ls -a
+현재 디렉터리의 목록(숨김파일 포함).
+
+ls -l
+현재 디렉터리의 목록을 자세히 보여줌.
+
+ls *.cfg
+확장자가 cfg인 목록을 보여줌.
+
+ls -l /etc/sysconfig/a*
+/etc/sysconfig 디렉터리에 있는 목록 중 앞 글자가 'a'인 것의 목록을 자세히 보여줌.
+
+===ls===
+
+===cd===
+
+cd
+현재 사용자의 홈 디렉토리로 이동. 만약 현재 사용자가 root면 '/root'로 이동.
+
+cd ~centos
+centos 사용자의 홈 디렉토리로 이동.
+
+cd ..
+바로 상위 디렉토리로 이동.
+
+cd ../etc/sysconfig
+현재 디렉토리의 상위 디렉토리로 이동한 뒤, /etc/sysconfig 디렉토리로 이동.
+
+===cd===
+
+===pwd===
+
+pwd
+현재 작업 중인 디렉토리의 경로 출력
+
+===pwd===
+
+===rm===
+
+rm abc.txt
+해당 파일을 삭제(내부적으로 'rm -i'로 연결됨)
+
+rm -i abc.txt
+삭제 시 정말 삭제할지 확인하는 메시지가 나옴
+
+rm -f abc.txt
+삭제시 확인하지 않고 바로 삭제(f는 force의 약자)
+
+rm -r abc
+해당 디렉토리를 삭제(r은 recursive의 약자)
+
+rm -rf abc
+r옵션과 f옵션을 합친 것으로, abc 디렉토리와 그 아래에 있는 하위 디렉토리를 강제로 전부 삭제(편리하지만 주의 할 것)
+
+===rm===
+
+===cp===
+
+새로 복사한 파일은 복사한 사용자의 소유가 된다. 
+명령어를 실행하는 사용자는 해당 파일의 읽기 권한이 필요하다.
+
+cp abc.txt cba.txt
+abc.txt를 cba.txt로 바꿔서 복사
+
+cp -r abc cba
+디렉토리를 해당 이름으로 바꿔서 복사
+
+===cp===
+
+===touch===
+
+touch abc.txt
+파일이 없을 경우엔 abc.txt라는 빈 파일을 생성하고, 있을 경우엔 파일의 최종 수정시간을 현재 시간으로 변경
+
+===touch===
+
+===mv===
+
+mv abc.txt /etc/sysconfig/
+abc.txt를 /etc/sysconfig/ 디렉토리로 이동
+
+mv aaa bbb ccc ddd
+aaa, bbb, ccc 파일을 '/ddd' 디렉토리로 이동
+
+mv abc.txt www.txt
+abc.txt의 이름을 www.txt로 변경해서 이동
+
+===mv===
+
+===mkdir===
+
+mkdir abc
+현재 디렉토리 아래에 '/abc'라는 디렉토리 생성
+
+mkdir -p /def/fgh
+/def/fgh 디렉토리를 생성하는데, 만약 '/fgh' 의 부모디렉토리인 '/def/'가 없다면 자동으로 생성(p는 parents의 약자)
+
+
+===mkdir===
+
+===rmdir===
+
+rmdir abc
+'/abc' 디렉토리를 삭제
+
+===rmdir===
+
+===cat===
+
+cat a.txt b.txt
+a.txt와 b.txt를 연결해서 파일의 내용을 화면에 보여줌
+
+===cat===
+
+===head===
+
+head abc.cfg
+해당 파일의 앞 10행을 화면에 출력
+
+head -3 abc.cfg
+앞 3행만 화면에 출력
+
+===head===
+
+===tail===
+
+tail -5 abc.cfg
+마지막 5행만 화면에 출력
+
+===tail===
+
+===more===
+
+more abc.cfg
+텍스트 형식으로 작성된 파일을 페이지 단위로 화면에 출력한다. 스페이스바를 누르면 다음페이지로 이동하며, B를 누르면 앞페이지로 이동한다.
+
+more +100 abc.cfg
+100행부터 출력
+
+===more===
+
+===less===
+
+less abc.cfg
+more명령어와 용도가 비슷하지만 기능이 더 확장되어 있다. more에서 사용하는 키도 사용할 수 있으며, page up, page down도 사용할 수 있다.
+
+===less===
+
+===file===
+
+file abc.cfg
+해당파일이 어떤 종류의 파일인지를 출력한다.(cfg 파일은 텍스트 파일이므로, 아스키 파일로 표시됨)
+
+file /usr/bin/gzip
+gzip은 실행파일이므로 Executable 파일로 표시됨
+
+===file===
+
+===clear===
+
+clrea
+현재 사용중인 터미널 화면을 깨끗이 지운다.
+
+===clear===
+
+■ 사용자 관리
+===useradd 또는 adduser===
+
+useradd newuser
+newuser라는 이름의 사용자 생성
+
+useradd -u 1111 newuser
+newuser 사용자를 생성하면서 사용자 ID를 1111로 지정
+
+useradd -g mygroup newuser
+newuser 사용자를 생성하면서 mygroup 그룹에 newuser를 포함시킴(mygroup은 사전에 생성되어 있어야 함)
+
+useradd -d /newhome newuser
+newuser 사용자를 생성하면서 홈 디렉토리를 /newhome으로 지정
+
+useradd -s /bin/csh newuser
+newuser 사용자를 생성하면서 기본 쉘을 /bin/csh로 지정
+
+===useradd 또는 adduser===
+
+===passwd===
+
+passwd newuser
+newuser 사용자의 비밀번호를 지정(또는 변경)
+
+===passwd===
+
+===usermod===
+
+usermod -g root newuser
+newuser 사용자의 그룹을 root 그룹으로 변경
+
+===usermod===
+
+===userdel===
+
+userdel newuser
+newuser 사용자를 삭제
+
+userdel -r newuser
+newuser 사용자를 삭제하면서 홈 디렉토리까지 삭제
+
+===userdel===
+
+===change===
+
+change -l newuser
+newuser 사용자에 설정된 사항을 확인
+
+change -m 2 newuser
+newuser 사용자에 설정한 암호를 사용해야 하는 최소일자(즉, 변경후 최소 2일은 사용해야 함)
+
+change -M 30 newuser
+newuser 사용자에 설정된 암호를 사용할 수 있는 최대일자(즉, 변경후 최대 30일을 사용할수 있음)
+
+change -E 2019/12/12 newuser
+newuser 사용자에 설정한 암호가 만료되는 날짜(즉, 2019/12/12까지만 사용할 수 있음)
+
+change -W 10 newuser
+newuser 사용자에 설정한 암호가 만료되기 전에 경고하는 기간. 지정하지 않았을 경우 기본 값은 7일(즉, 암호가 만료되기 10일전부터 경고 메시지가 나타남)
+
+===change===
+
+===groups===
+
+groups
+현재 사용자가 소속된 그룹을 보여줌
+
+groups newuser
+newuser가 소속된 그룹을 부여줌
+
+===groups===
+
+===groupadd===
+
+groupadd newgroup
+newgroup이라는 그룹을 생성
+
+groupadd -g 2222 newgroup
+newgroup 그룹을 생성하면서 그룹 ID를 2222로 지정
+
+===groupadd===
+
+===groupmod===
+
+groupmod -n newgroup mygroup
+newgroup 그룹의 이름을 mygroup 으로 변경
+
+===groupmod===
+
+===groupdel===
+
+groupdel newgroup
+newgroup 그룹을 삭제(단, 해당 그룹을 주요 그룹으로 지정한 사용자가 없어야 한다.)
+
+===groupdel===
+
+===gpasswd===
+
+gpasswd newgroup
+newgroup 그룹의 암호를 지정
+
+gpasswd -A newuser newgroup
+newuser를 newgroup 그룹의 관리자로 지정
+
+gpasswd -a user1 newgroup
+user1을 newgroup 그룹의 사용자로 추가
+
+gpasswd -d user1 newgroup
+user1을 newgroup 그룹의 사용자에서 제거
+
+===gpasswd===
+
+■ 프로그램 설치
+===rpm===
+
+rpm -Uvh 패키지파일이름.rpm
+U(대문자) : 기존에 패키지가 설치되지 않았다면 일반적인 설치를 하고, 기존에 패키지가 설치되어 있다면 업그레이드 한다.(i 옵션은 설치되어 있는 경우 에러가 발생하므로, U옵션이 편하다.)
+v	: 설치과정 확인
+h	: 설치진행 과정을 '#'기호로 화면에 출력
+
+rpm -e 패키지이름
+해당 패키지 삭제
+
+rpm -qa 패키지이름
+시스템에 해당 패키지가 설치되어 있는지 확인
+
+rpm -qf 파일절대경로
+이미 설치된 파일이 어느 패키지에 포함된 것인지를 확인
+
+rpm -ql 패키지이름
+특정 패키지에 어떤 파일들이 포함되어 있는지 확인
+
+rpm -qi 패키지이름
+설치된 패키지의 상세 정보
+
+rpm -qlp 패키지파일이름.rpm
+패키지 파일에 어떤 파일들이 포함되었는지 확인
+
+rpm -qip 패키지파일이름.rpm
+패키지 파일의 상세 정보 
+
+rpm은 의존하는 패키지가 사전에 설치되어 있지 않다면 설치가 되지 않는다.(이에 반해 yum은 관련 의존성을 알아서 해결해준다.)
+
+===rpm===
+
+===yum===
+
+yum -y install 패키지이름
+기본 설치방법
+
+yum localinstall rpm파일이름.rpm
+rpm파일 설치방법
+
+yum check-update
+업데이트 가능한 목록보기
+
+yum update  패키지이름
+업데이트
+
+yum remove 패키지이름
+삭제
+
+yum info 패키지이름
+정보확인
+
+yum groupinstall "패키지이름"
+패키지 그룹 설치 (패키지 그룹의 이름은 주로 띄어쓰기가 많으므로 꼭 ""안에 써야한다.)
+
+yum grouplist
+패키지그룹 종류 확인
+
+yum list 패키지이름
+패키지 리스트 확인
+
+yum provides 파일이름
+특정 파일이 속한 패키지 이름 확인
+
+yum install --nogpgcheck rpm파일이름.rpm
+GPG 키 검사 생략 ( CENTOS 7에서 인증되지 않은 rpm 파일을 --nogpgcheck 옵션을 사용하면 GPG 키 인증을 생략하므로 설치할 수 있다.)
+
+yum clean all
+기존 저장소 목록 지우기
+===yum===
+
+■ 파일 압축과 묶기
+
+==파일압축==
+
+xz 파일이름
+'파일이음.xz'로 압축, 기존파일은 삭제됨
+
+xz -d 파일이름.xz
+'파일이름.xz' 압축 파일을 일반 파일인 '파일이름'으로 만듦
+
+xz -l 파일이름.xz
+'파일이름.xz' 압축 파일에 포함된 파일 목록과 압축률등을 출력
+
+xz -k 파일이름
+압축 후에 기존 파일을 삭제하지 않고 그대로 둠
+
+bzip2 파일이름
+파일이름.bz2로 압축
+
+bzip2 -d 파일이름.bz2
+'파일이름.bz2' 압축파일을 일반 파일인 '파일이름' 으로 만듦
+
+bunzip2 파일이름.bz2
+확장명 .bz2 압축해제
+
+gzip 파일이름
+파일이름.gz로 압축
+
+gzip -d 파일이름.gz
+'파일이름.gz' 압축파일을 일반 파일인 '파일이름' 으로 만듦
+
+gunzip 파일이름.gz
+확장명 .gz 압축해제
+
+zip 생성할파일이름.zip 압축할파일이름
+생성팔파일이름.zip 으로 압축
+
+unzip 압축파일이름.zip
+압축파일이름.zip 압축해제
+
+==파일압축==
+
+==파일묶기 tar ==
+
+	동작
+tar	c(소문자) : 새로운 묶음을 만든다
+	x	: 묶인 파일을 푼다
+	t	: 묶음을 풀기 전에 묶인 경로를 보여준다.
+	C(대문자): 묶음을 풀때 지정된 디렉터리에 압축을 푼다.
+
+	옵션
+	f(필수)	: 묶음 파일 이름 지정
+	v	: 파일이 묶이거나 풀리는 과정을 보여준다(생략가능)
+	J(대문자): tar + xz
+	z(소문자): tar + gzip
+	j(소문자): tar + bzip2
+
+tar cvf my.tar
+묶기
+
+tar cvfJ my.tar.xz
+묶기 + xz 압축
+
+tar cvfz my.tar.gz
+묶기 + gzip 압축
+
+tar cvfj my.tar.bz2
+묶기 + bzip2 압축
+
+tar tvf my.tar
+파일 확인
+
+tar xvf my.tar
+tar 풀기
+
+tar Cxvf newdirmy.tar
+newdir에 tar 풀기
+
+tar xfJ my.tar.xz
+xz 압축해제 + tar 풀기
+
+tar xfz my.tar.gz
+gzip 압축해제 + tar 풀기
+
+tar xfj my.tar.bz2	
+bzip2 압축해제 + tar 풀기
+	
+==파일묶기 tar ==
+
+==파일 위치검색 find ==
+
+find 경로 옵션 action
+
+	옵션	-name
+		-user (소유자)
+		-newer (전,후)
+		-perm (허가권)
+		-size (크기)
+	action	-print (기본)
+		-exec (외부명령실행)
+
+find /etc -name "*conf"
+'/etc' 디렉터리 하위에 확장명이 '.conf' 인 파일 검색
+
+find /home -user centos
+'/home' 디렉터리 하위에 소유자가 'centos' 인 파일 검색
+
+find ~ -perm 644
+현재 사용자의 홈디렉터리 하위에 허가권이 644인 파일 검색
+
+find /usr/bin -size +10k -size -100k
+/usr/bin 디렉터리 하위에 파일크기가 10kb ~ 100kb 인 파일 검색
+
+find ~ -size 0k -exec ls -l { } \;
+현재 사용자의 홈 디렉터리 하위에 파일 크기가 0인 파일의 목록을 상세히 출력
+
+find /home -name "*.swp" -exec rm { } \;
+/home 홈 디렉터리 하위에 확장명이 *.swp 인 파일을 삭제
+
+which 실행파일이름
+PATH에 설정된 디렉터리만 검색
+
+whereis 실행파일이름
+실행파일, 소스, man페이지 파일까지 검색
+
+locate 파일이름
+파일목록 데이터베이스에서 검색, 'updatedb' 명령어를 1회 실행해야 사용할 수 있음
+
+==파일 위치검색 find ==
+
+■ 시스템 설정
+
+===system===
+
+system-config-keyboard
+키보드 설정
+
+system-config-language
+언어설정
+
+system-config-priter
+프린터 설정
+
+system-config-users
+사용자 설정
+
+system-config-kickstart
+킥스타트 설정
+
+===system===
+
+===cron 과 at===
+
+cron	: 주기적으로 반복되는 작업 예약
+at	:일회성 작업을 예약
+
+/etc/crontab	분 시 일 월 요일 사용자 실행명령 
+
+00 05 1 * * root cp -r /home /backup
+매월 1일 새벽 5시 00분에 root 사용자로 cp -r /home /backup 을 실행한다
+
+01 * * * * root run-parts /etc/cron.hourly	※ 'run-parts' 명령어는 다음에 나오는 디렉터리 안의 명령을 모두 실행함
+매시간 1분에 /etc/cron.hourly 디렉터리 안에 있는 명령들을 자동 실행
+
+at 3:00am tomorrow
+내일 새벽3시
+
+at now + 1hours
+1시간 후
+
+at -l
+확인
+
+atrm 작업번호
+취소
+
+===cron 과 at===
+
+■ 네트워크 관련 설정
+
+route add default gw 게이트웨이주소 dev 장치이름
+게이트웨이를 별도로 추가해주는 명령어
+
+ifconfig 장치이름
+네트워크 설정 정보를 출력
+
+ifup 장치이름
+네트워크 장치를 가동
+
+ifdown 장치이름
+네트워크 장치를 정지
+
+nslookup
+DNS 서버의 작동을 테스트
+
+ping IP주소 또는 URL
+네트워크 상에서 응답하는지 체크
+
+===파이프, 필터, 리다이렉션===
+
+ls -l /etc | more
+'ls -l /etc'를 입력하면 파일이 너무 많아서, 1페이지에 모두 담을 수 없으므로 1페이지씩 나눠서 보겠다는 의미
+
+ps -ef | grep bash
+bash 라는 글자가 들어간 프로세스만 출력
+
+rpm -qa | grep yum
+설치된 패키지 중에소 'yum' 이라는 글자가 들어간 패키지를 출력
+
+ls -l > list.txt
+'ls -l' 의 결과를 화면에 출력하지 않고 list.txt 파일에 저장 (overwrite)
+
+ls -l >> list.txt
+'ls -l' 의 결과를 화면에 출력하지 않고 list.txt 파일에 저장 (append)
+
+sort < list.txt
+list.txt 파일을 정령해서 화면에 출력한다
+
+sort < list.txt > out.txt
+list.txt 파일을 정령해서 out.txt 파일에 쓴다
+
+===파이프, 필터, 리다이렉션===
+
+===프로세스===
+
+ps -ef | grep 프로세스이름
+프로세스 상태를 확인하는 명령(ps -C 프로세스이름과 동일)
+
+pidstat -p <pid1>, <pid2>, <pid3>, ,,,
+프로세스별 cpu 사용량 모니터링 
+
+pmap <pid>
+프로세스의 메모리 구성
+
+kill -9 프로세스번호
+프로세스 강제종료
+
+===프로세스===
+
+===서비스===
+
+systemctl start/stop/restart 서비스이름
+서비스 시작/중지/재시작
+
+systemctl status 서비스이름
+서비스 상태확인
+
+systemctl enable/disable 서비스이름
+서비스 사용/사용안함 설정
+
+===서비스===
+
+===HP-UNIX===
+
+stty erase ^?
+백스페이스 삭제 
+
+===HP-UNIX===
+
+===기본 쉘 확인===
+echo $SHELL
+기본 적용 쉘 확인
+
+cat /etc/shells
+사용 가능 쉘 확인
+
+$ chsh
+Password: (암호 입력)
+Changing the login shell for userID
+Enter the new value, or press ENTER for the default
+Login Shell [/bin/sh]: /bin/bash
+기본 쉘 변경시
+
+===기본 쉘 확인===
+
+===방화벽 해제===
+ftp 포트 해제
+#iptables -I INPUT 1 -p tcp --dport 21 -j ACCEPT 
+#iptables -I OUTPUT 1 -p tcp --dport 21 -j ACCEPT
+===방화벽 해제===
+
+===port Listeng확인===
+ftp port
+netstat -anp | grep ftp
+===port Listeng확인===
+
+
+===시스템 리소스 정보===
+cpu 정보
+cat /proc/cpuinfo
+
+메모리 정보
+cat /proc/meminfo
+
+디스크 정보
+df -h
+
+0. CPU 정보 확인
+> cat /proc/cpuinfo
+ 
+1. CPU 코어 전체 개수 확인
+> grep -c processor /proc/cpuinfo
+ 
+2. 물리 CPU 수 확인
+> grep "physical id" /proc/cpuinfo | sort -u | wc -l
+ 
+3. CPU당 물리 코어 수 확인
+> grep "cpu cores" /proc/cpuinfo | tail -1
+===시스템 리소스 정보===
