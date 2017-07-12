@@ -1,0 +1,38 @@
+memory leak 유무 판별
+1. FULL GC후 메모리 사용량 확인 : FULL GC후 Old 영역 메모리 사용량이 80% 이상일 경우
+
+jstat -<option> [-t] [-h<lines>] <vmid> [<interval> [<count>]]
+
+-t : 수행시간 표시
+-h:lines : 각 열의 설명을 지정된 라인 주기로 표시
+interval : 로그를 남기는 시간의 차이(밀리초 단위)
+count : 로그 남기는 횟수
+
+-<option>
+class : 클래스 로더에 대한 통계
+compiler : 핫스팟 JIT 컴파일러에 대한 통계
+gc : GC 힙 영역에 대한 통계
+gccapacity : 각 영역의 허용치와 연관된 영역에 대한 통계
+gccause : GC의 요약 정보와, 마지막 GC와 현재 GC에 대한 통계
+gcnew : 각 영역에 대한 통계
+gcnewcapacity : Young 영역과 관련된 영역에 대한 통계
+gcold : Old와 Perm 영역에 대한 통계
+gcoldcapacity : Old 영역의 크기에 대한 통계
+gcpermcapacity : Perm 영역의 크기에 대한 통계
+gcutil : GC에 대한 요약 정보
+printcompilation : 핫스팟 컴파일 메서드에 대한 통계
+
+ex) jstat -gcnew -t -h10 2624 1000 20 > jstat_WAS1.log
+각 영역에 대한 통계를 보여주며,
+수행시간을 나타내고, 10줄에 한번씩 각 열의 설명(타이틀)을 나타내고,
+프로세스 번호는 2624이고, 1초(1000ms)에 한번씩 보여주고,
+20회 반복 수행을 하고, 마지막으로 jstat_WAS1.log파일에 결과를 저장한다.
+
+ex) jstat -gccapacity 3580
+ex) jstat -gcutil 3580 1s
+
+-gc 분석툴 
+GC Analyzer
+IBM GC 분석기
+HPjtune
+HPjmeter
