@@ -1,0 +1,32 @@
+1. jvm heap 상태 확인
+jmap -heap <pid>
+
+2. 클래스별 객체 수와 메모리 사용량 확인
+jmap -histo:live <pid> | more
+
+3. 실시간 heap 메로리 사용 정보 확인
+jmap -heap:format=b <pid>
+
+4. heapdump 파일 생성
+jmap -dump:format=b, file=<filename> <pid>
+
+filename : *.hprof 형태
+
+5. jvm의 pid 확인
+jps -v
+
+메인 메소드명 포함
+jps -m
+
+전체 패키지명 포함
+jps -i 
+
+6. heapdump 분석 (jhat)
+jhat heapdump경로
+-> http://localhost:7000 로컬 웹서버가 구동된다. 접속해서 heapdump 분석 결과 확인 가능
+
+7. Eclipse의 MAT 설치후 heapdump 파일 로드
+Getting started Wizard에서 Leak Suspects Report 선택
+분석결과 상단에 Open Dominator Tree for entire heap
+메모리를 많이 차지하고 있는 객체 위주로 노출되므로, Retained Heap 항목을 선택하여 개선
+
