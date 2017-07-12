@@ -1,0 +1,92 @@
+import groovy.transform.CompileStatic;
+import org.araqne.logdb.groovy.GroovyParserScript;
+
+@CompileStatic
+class NamedParser extends GroovyParserScript {
+  
+  int startRow = 10000;
+  int headerIndex = -1;
+  int currentStepNumberIndex = 0;
+  int index = 0;
+  int headerSize = 0;
+  int lineDataSize = 0;
+  boolean once = true;
+  
+  String[] header;
+  String[] currentStepNumber = new String[10000];
+  String msec = "_msec=";
+  String at = "@";
+  String equal = "=";
+  
+  String lotId = "";
+  
+  boolean lotCheck = false;
+  boolean slotCheck = false;
+  
+  public Map<String, Object> parse(Map<String, Object> params) {
+	
+	String line = params.get("line");
+		
+	if(line.contains("HistoricalData:")){
+		startRow = index + 2;
+		headerIndex = index + 1;
+	}
+		
+	if(index == headerIndex) {
+		header = line.split("\t");
+		headerSize = header.size();
+		lineDataSize = headerSize*2;
+		
+		for(int i=0; i<header.size();i++){
+			if(header[i].equals("CurrentStepNumber")){
+				currentStepNumberIndex = i;
+				break;
+			}
+		}
+	}
+	
+	if(index > startRow){
+		String[] line_data = line.split("\t");
+		String[] merged_line = new String[150];
+		if(line_data != null && line_data.size() > 0) {
+			StringBuilder merged = new StringBuilder();
+			
+			int j = line_data.size();
+			for(int i=0; i < j; i++ ){
+				if(line_data[i].contains("---")) continue;
+				if(i%2 == 0){
+					//params.put(header[i/2] + "__TIME", line_data[i]);
+					//line_data[i] = header[i/2] + "_msec=" + line_data[i];
+					merged.append(line_data[i]);
+				}else{
+					//params.put(header[i/2], line_data[i]);
+					//line_data[i] =  header[i/2] + "=" + line_data[i];
+					merged.append(at);
+					merged.append(header[i/2]);
+					merged.append(equal);
+					merged.append(line_data[i]);
+					merged_line[i/2] = merged.toString();
+					merged.setLength(0);
+					
+				}
+								
+				//if(i==((currentStepNumberIndex*2)-1)){
+				//	currentStepNumber[i] = line_data[i];
+				//}
+			}
+			//params.put("PARAM_NAME", Arrays.toString(line_data));
+			params.put("MERGED_PARAM", Arrays.toString(merged_line));
+		}
+	}
+	index++;
+	//if(header != null){
+		//params.put("header", Arrays.toString(header));
+		//once = false;
+	//}
+	//params.put("CRITERIA", Arrays.toString(currentStepNumber));
+	//params.put("line_data_size", lineDataSize);
+	params.put("index", index);
+	//params.put("startRow", startRow);
+	return params;
+  }
+}
