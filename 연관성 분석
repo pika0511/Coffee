@@ -1,0 +1,38 @@
+1. 지지도(support)
+전체 거래에서 특정 물품 A와 B가 동시에 거래되는 비중으로,
+해당 규칙이 얼마나 의미가 있는 규칙인지를 보여준다.
+
+지지도 = P(A∩B) : A와 B가 동시에 일어난 횟수 / 전체 거래 횟수
+
+ex) X = {bread, butter}
+supp(X) = n(bread ∩ butter)/total transaction
+ 
+2. 신뢰도(confidence)
+A를 포함하는 거래 중 A와 B가 동시에 거래되는 비중으로,
+A라는 사건이 발생했을 때 B가 발생할 확률이 얼마나 높은지를 말해준다.
+※ 신뢰도는 항목 A의 거래중에서 항목 B가 포함된 거래의 비율을 말한다.
+
+신뢰도 = P(B|A)	     : A의 사건 영역중에 B가 포함되는 비율
+     = P(A∩B) / P(A) : A와 B가 동시에 일어난 횟수 / A가 일어난 횟수
+
+ex) A = {bread, butter}, B = {milk}
+ conf(A -> B) = supp(AUB) / supp(A)
+              = supp({bread, butter, milk}) / supp({bread, butter})
+
+3. 향상도(lift)
+A와 B가 동시에 거래된 비중을 A와 B가 서로 독립된 사건일때 동시에 거래된
+비중으로 나눈 값. 즉, A와 B가 우연에 의해서 같이 거래된 확률보다
+A와 B사이의 관계가 얼마나 상관성이 있는지를 보는 지표(보완재 개념)
+
+향상도 = P(A∩B) / P(A)*P(B) = P(B|A) / P(B)
+: A와 B가 동시에 일어난 횟수 / A, B가 독립된 사건일때 A, B가 동시에 일어날 확률
+
+향상도가 1보다 클때 : 두 제품은 보완재
+향상도가 1일때 : 두 제품의 구매는 상호 독립적
+향상도가 1보다 작을때 : 두 제품은 대체제
+
+※ 참고 사이트 
+http://hackability.kr/entry/Data-Mining-12-Apriori-Algorithm-Frequent-Itemset
+http://elearning.kocw.net/KOCW/document/2014/Chungbuk/choisanghyun/12.pdf
+http://www.openwith.net/?p=615
+
