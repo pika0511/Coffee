@@ -1,0 +1,17 @@
+ps -eT euser, pid, ppid, lwp, vsz, rss, comm | grep wasadmt | more
+
+
+
+
+ps -e -T | grep
+ps -eLf  | grep logpresso
+ps -ef | grep logpresso
+ps -eL -o pid,cmd,lwp,nlwp | grep logpresso
+
+strace -p <pid>
+top -H -p <pid>
+
+■ cpu, mem 사용량 확인
+ps -C java -o user,pid,pcpu,pmem,vsize,size,etime,comm
+
+top -b -n 1 -u batch
