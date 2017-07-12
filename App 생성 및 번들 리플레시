@@ -1,0 +1,76 @@
+1. 작업 PC에서 텔넷 접속 및 로그인
+	  
+2. 최초 App Template 빌드
+
+logpresso.createAppProject
+	=> Project path?                     c:/logGenerator                              
+	=> Bundle Symbolic Name?             com.logpresso.logGenerator
+	=> Bundle version?                   1.0.0
+	=> App ID ?                          loggeneartor                                     
+	=> App Name?                         logGenerator
+	=> App version?                      1.0.0
+	=> Program ID (empty line to exit)?  logGenerator
+	=> Program Display Name?             logGenerator
+	=> Program Profile?                  all,admin,member	
+	=> Program ID (empty line to exit)?  (press enter key to exit)	 
+	=> Genarated
+		 
+logpresso.buildApp c:/logView c:/logViewer.jar
+
+	=> 해당 경로로 logViewer.jar 로 App Template이 생성됨 
+
+logpresso.buildApp   /home/logpresso/server/logViewer/ /home/logpresso/server/logViewer.jar  
+	=> 해당 경로로 logGenerator.jar 로 App Template이 생성됨 
+	
+bundle.install  file:///c:/logGenerator/logGenerator.jar
+	=> bundle [number 117] loaded
+		
+bundle.list
+	=> 생성한 번들 번호는 [INSTALLED] 상태일 것임, 하기에 활성화 시켜주는 작업 진행  
+     
+bundle.start 117 
+	=> bundle 117 started
+
+bundle.list
+	=> 해당 번들 번호로 [ACTIVE] 확인
+
+■ 수정한 bundle refresh 작업
+1. 수정 작업 후 텔넷 접속
+logpresso.buildApp c:/logView c:/logViewer.jar
+
+2. 새로운 번들로 교체 (교체할 번들 번호 기입)
+bundle.replace 112 file:///c:/logViewer.jar
+
+3. 번들 캐시 리프레시
+bundle.refresh
+
+
+■ 시스템혁신 신규생성용
+logpresso.createAppProject
+	=> Project path?                     해당경로                            
+	=> Bundle Symbolic Name?             com.skhynix.logviewer
+	=> Bundle version?                   1.0.0
+	=> App ID ?                          logViewer                                     
+	=> App Name?                         logViewer
+	=> App version?                      1.0.0
+	=> Program ID (empty line to exit)?  logViewer
+	=> Program Display Name?             LOG VIEWER
+	=> Program Profile?                  엔터	
+	=> Program ID (empty line to exit)?  (press enter key to exit)	 
+	=> Genarated
+		 
+logpresso.buildApp   c:/logGenerator c:/logGenerator/logGenerator.jar 
+	=> 해당 경로로 logGenerator.jar 로 App Template이 생성됨 
+
+logpresso.buildApp   /home/logpresso/server/logViewer/ /home/logpresso/server/logViewer.jar  
+	=> 해당 경로로 logGenerator.jar 로 App Template이 생성됨 
+	
+bundle.install  file:///c:/logGenerator/logGenerator.jar
+	=> bundle [number 117] loaded
+
+■ 시스템혁신 리프레시용
+
+1. 교체
+bundle.replace 109 file:////home/logpresso/server/logViewer.jar
+2. 리프레시
+bundle.refresh
