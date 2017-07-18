@@ -1,8 +1,0 @@
-        try {// open Tibrv in native implementation
-            Tibrv.open(Tibrv.IMPL_NATIVE); 
-        }   catch (TibrvException e) {  
-            logMgr.setLogMessage(METHOD, LogManager.CATEGORY_ERROR, 
-					LogManager.DIRECTION_NONE, 
-					"Failed to open Tibrv in native implementation: " + e.getMessage());
-            System.exit(1);
-        }    
