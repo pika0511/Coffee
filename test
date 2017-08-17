@@ -1,0 +1,4 @@
+1.legacy_linux
+- /var/log/messages
+- /EA/adapter/log/mea.log
+- /solidfire/scripts/log/sms-critical.log
