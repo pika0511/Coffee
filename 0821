@@ -1,0 +1,17 @@
+안녕하세요, 비앤지시스템 최명수입니다.
+
+많은 도움주심에 감사드립니다.
+
+SNMPWALK 수집기와 관련하여 요청주신 SNMP MIB 정보 송부드립니다.
+
+■ 프로세스 상태 모니터링과 관련한 MIB
+.iso.org.dod.internet.mgmt.mib-2.host.hrSWRun.hrSWRunTable.hrSWRunEntry.hrSWRunIndex		(OID : .1.3.6.1.2.1.25.4.2.1.1)
+.iso.org.dod.internet.mgmt.mib-2.host.hrSWRun.hrSWRunTable.hrSWRunEntry.hrSWRunName		(OID : .1.3.6.1.2.1.25.4.2.1.2)
+.iso.org.dod.internet.mgmt.mib-2.host.hrSWRun.hrSWRunTable.hrSWRunEntry.hrSWRunID		(OID : .1.3.6.1.2.1.25.4.2.1.3)
+.iso.org.dod.internet.mgmt.mib-2.host.hrSWRun.hrSWRunTable.hrSWRunEntry.hrSWRunPath		(OID : .1.3.6.1.2.1.25.4.2.1.4)
+.iso.org.dod.internet.mgmt.mib-2.host.hrSWRun.hrSWRunTable.hrSWRunEntry.hrSWRunParameters	(OID : .1.3.6.1.2.1.25.4.2.1.5)
+.iso.org.dod.internet.mgmt.mib-2.host.hrSWRun.hrSWRunTable.hrSWRunEntry.hrSWRunType		(OID : .1.3.6.1.2.1.25.4.2.1.6)
+.iso.org.dod.internet.mgmt.mib-2.host.hrSWRun.hrSWRunTable.hrSWRunEntry.hrSWRunStatus		(OID : .1.3.6.1.2.1.25.4.2.1.7)
+
+
+감사합니다.
