@@ -1,0 +1,62 @@
+■ 회의 내용
+1. 인프라 관련 모든 내용 및 선감지 관련 내용
+2. 타사 구축 내용
+3. 보유시스템 데모 
+
+■ 질의 내용
+1. 장애 선감지 모니터링 주요항목(예시)
+ - CPU 
+   %sys(kernel) 사용량이 70% 초과시 점검 필요
+   %sys + %user 가 80% 이상이면 병목으로 판단
+
+ - MEMORY
+   paging space In/Out이 10 이상이거나 page fault가 1000번 이상 발행하면 병목으로 판단
+   프로세스의 swap memory 사용량이 85% 이상일때 점검 필요	
+   swap memory 사용량이 85% 초과시 점검 필요   
+
+ - DISK 사용량
+ - DISK I/O
+   %iowait가 40% 이상이거나 사용자 application에 의해 특정 disk의 %tm_act가 70%를(disk가 사용되고 있는 시간) 초과하는 경우 병목으로 판단
+  
+2. 시스템 리소스 수집 형태
+ - 예정 : SNMP
+
+3. 프로세스 상태 수집 형태
+ - 예정 : SNMP
+
+4. 웹서버, WAS, DATABASE, OS 주된 장애 유형
+ - 웹서버 ↔ WAS 간의 MAX Clients ↔ MAX Threads 값의 불균형(웹서버의 Client 접속 끊김현상 또는 접속 불가)
+ - WAS 관련
+   ㄱ. 중복 로그 접점을 제거하고 하나로 통일
+   ㄴ. 로그 오버플로우 방지
+   ㄷ. Synchronized Logging은 Disk I/O와 App의 Bottle Neck → Asynchronized Logging으로 변경
+   ㄹ. maxKeepAliveRequest수가 1000이 넘을 경우 keep alive를 disable 변경
+   ㅁ. DNS lookups를 줄이도록 한다. (enableLookups=false)
+   ㅂ. maxThreads를 늘리고, connectionTimeout을 줄이도록 한다. (connectionTimeout값이 클 경우 thread 고갈 가능성 ↑)
+   ㅅ. WAS가 두개 이상일 경우 Load Balancing 처리
+
+5. 모니터링 항목에 대한 이기종간 상관분석(패턴분석) - 해당 사례에 대한 문의
+
+6. 장애 선감지 관련 중요하지만 해결하기 어려운 과제
+
+7. 장애가 많은 순서 : {OS, WEBSERVER, WAS, DATABASE}
+
+8. 장애 발생시 초기 증상
+ - WEBSERVER
+ - WAS
+ - DATABASE
+ - OS
+
+9. 장애 관련 주목해야 할 로그
+
+10. 장애 선감지 관련 방법론
+
+11. 기존 시스템에서 개선이 필요한 사항
+
+12. 기존 시스템 참조
+
+13.
+
+
+
+
