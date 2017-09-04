@@ -1,0 +1,41 @@
+==리눅스======================================
+
+■ 확인명령
+① service snmpd status
+② netstat -an | grep ":61"
+※ snmp 가 udp 기반이라고..
+   ftp  는 tcp 기반...
+   일단, 이렇게만 알아두자..
+
+■ 설치
+$ yum -y install net-snmp*
+■ 환경설정 파일 변경
+$ vi /etc/snmp/snmpd.conf
+
+① First 추가
+com2sec logpresso 165.244.240.172 public
+com2sec logpresso 165.244.240.173 public
+
+② Second 추가
+group logpressoGroup v1 logpresso
+
+③ Third 추가
+view all included .1 80
+
+④ Finally 추가
+access logpressoGroup "" any noauth exact all none none
+
+■ 저장
+:wq
+
+
+==Windows Server 2012 r2==================================
+
+①서버 관리자
+②역할 및 기능 추가
+③기능 → SNMP 서비스 체크 → SNMP WMI 공급자 체크 → 다음
+④Win+R → service.msc → SNMP service 우클릭 → 속성 → 보안 → 추가(받아들인 커뮤니티 이름) → 커뮤니티 권한(읽기전용) / 커뮤니티 이름(public) → 추가
+⑤다음호스트로부터 SNMP 패킷 받아들이기(추가) → Logpresso Server IP(수집서버) 입력 → 추가
+⑥적용 → 확인
+⑦SNMP Service 우클릭 → 다시 시작
+⑧제어판 → 모든 제어판 항목 → Windows 방화벽 → Windows 방화벽을 통해 앱 또는 기능 허용 → 설정변경 → SNMP Service 체크 → 확인
