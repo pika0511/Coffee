@@ -1,0 +1,103 @@
+[OS별 수집대상서버 FTP 설치]
+
+==Linux==============================================
+■ 설치명령
+$ yum -y install vsftp ftp
+
+■ ftp 환경설정파일 열기
+$ vi /etc/vsftpd/vsftpd.conf
+
+■ ftp 환경설정파일 변경(수정 및 삽입)
+# daemon started from an initscript.
+listen=YES  ← 수정부분
+listen_address=165.244.240.172  ← 수정부분
+listen_address=165.244.240.173  ← 수정부분
+# 이렇게 수집서버 IP 입력하면 됨
+...
+...
+#Allow anonymous FTP? (Disabled by default).
+anonymous_enable=NO  ← 수정부분
+#
+# Uncomment this to allow local users to log in.
+local_enable=YES  ← 수정부분
+...
+...
+##(맨 마지막에) 계정 제한시 추가 작성 필요
+userlist_enable=YES
+userlist_deny=NO
+
+■ FTP user_list 파일 열기
+①vi /etc/vsftpd/user_list
+②"마지막에 추가 원하는 계정 입력"
+
+■ FTP 재시작
+$ service vsftpd restart
+
+==HP-UX==============================================
+■ 시스템 관리자 모드 실행
+# sam
+
+■ SAM Networking and Communications 선택
+
+■ SAM Network Services 선택
+
+■ FTP Disabled File transfer capability 선택 후 Tab키 입력
+
+■ 메뉴 → Actions 선택 → Enable 선택 → FTP Enabled File transfer capability (서비스 상태 확인)
+
+■ FTP 환경 설정 파일 열기
+# vi /etc/inetd.conf
+
+■ FTP 환경 설정 파일 수정
+#	ARPA/Berkeley services
+#
+##
+ftp   stream   tcp   nowait   root   /usr/lbin/ftpd   ftpd -l -a /etc/ftpd/ftpaccess ← 추가
+#ftp   stream   tcp   nowait   root   /usr/lbin/ftpd   ftpd -l
+telnet   stream   tcp   nowait   root   /usr/lbin/telnetd   telnetd
+
+# Before uncommenting the "tftp" entry below, please make sure
+# that you have a "tftp" user in /etc/passwd. If you don't
+# have one, please consult the tftpd(1M) manual entry for
+# information about setting up this service.
+
+■ FTP 접근 권한 파일 열기
+# vi /etc/ftpd/ftpaccess
+
+■ FTP 접근 권한 파일 수정
+# path-filter...
+path-filter anonymous /etc/pathmsg ^[-A-Za-z0-9_\.]*$ ^\. ^-
+path-filter guest     /etc/pathmsg ^[-A-Za-z0-9_\.]*$ ^\. ^-
+
+# specify which group of users will be treated as "guests".
+questgroup ftponly ← 추가부분
+
+email user@hostname
+
+banner /etc/ftpd/msg
+
+log commands real,guest,anonymous
+log transfers real,guest,anonymous inbound,outbound
+
+■ ftpusers 파일 열기
+# vi /etc/ftpd/ftpusers
+
+■ ftpusers 파일 수정
+※ 이곳에 작성된 USER는 FTP 접근 불가
+
+==Windows Server 2012 R2==============================================
+■ 서버관리자 클릭 → 역할 및 기능 추가 → [서버역할]웹 서버(ISS) 체크 → 기능추가 클릭 → 다음 → [역할 서비스]FTP 서버, FTP 서비스, FTP 확장성, 관리도구, IIS 관리 콘솔 → 다음 → 설치 → 닫기
+→ [서버관리자창]도구 클릭 → IIS(인터넷 정보 서비스) 관리자 → [좌측사이드바] 사이트 클릭 → [우측사이드바]FTP 사이트 추가...클릭 → [FTP 사이트 이름]ex)ftp → [콘텐츠 디렉터리] 루트디렉토리 설정 → 다음 → [바인딩 및 SSL 설정](포트)21번 확인/(SSL)SSL사용 안 함 → 다음
+→ [인증 및 권한 부여 정보]
+(인증)
+- 기본체크
+(권한 부여)
+①모든 사용자 → (사용권한)읽기,쓰기 체크 → 마침
+②지정한 역할 또는 사용자 그룹/group이름 입력 → (사용권한)읽기,쓰기 체크 → 마침
+③지정한 사용자/lgcuser → (사용권한)읽기,쓰기 체크 → 마침
+
+■ [서버관리자창]도구 클릭 → IIS(인터넷 정보 서비스) 관리자 → [좌측사이드바]ftp클릭 → FTP IP 주소 및 도메인...더블클릭 → [우측사이드바]허용 항목 추가...클릭 → [특정 IP 주소] Logpresso server ip(수집서버)입력 → 확인
+→ [우측사이드바]기능설정편집...클릭 → [지정되지 않은 클라이언트에 대한 액세스] 거부 선택 → 확인
+
+■ 서비스 재시작
+[서버관리자창]도구 클릭 → 서비스 → Microsoft FTP Service 우클릭 → 다시 시작
